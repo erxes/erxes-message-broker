@@ -1,5 +1,3 @@
-import * as debug from 'debug';
+import * as debug from "debug";
 
-export const debugBase = message => {
-  debug('erxes-message-broker')(message);
-};
+export const debugBase = debug("erxes-message-broker:");
