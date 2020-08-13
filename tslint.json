@@ -4,9 +4,10 @@
   "jsRules": {},
   "rules": {
     "object-literal-sort-keys": false,
-    "interface-name": [true, "never-prefix"],
     "quotemark": [true, "single", "avoid-escape"],
-    "trailing-comma": false
+    "trailing-comma": false,
+    "arrow-parens": [true, "ban-single-arg-parens"],
+    "interface-name": [true, "always-prefix"]
   },
   "rulesDirectory": []
 }
