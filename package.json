@@ -22,7 +22,6 @@
     "amqplib": "^0.6.0",
     "cote": "^1.0.0",
     "debug": "^4.1.1",
-    "tslint-config-prettier": "^1.18.0",
     "uuid": "^8.3.0"
   },
   "devDependencies": {
