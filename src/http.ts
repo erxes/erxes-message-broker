@@ -89,6 +89,8 @@ export const consumeQueue = (queueName, callback) => {
   debugBase(`Adding post for ${queueName}`);
 
   server.post(`/${queueName}`, async (req, res) => {
+    debugBase(`Received data in ${queueName}`);
+
     const response = await callback(req.body);
 
     if (!response) {
