@@ -1,4 +1,4 @@
-import * as request from "request-promise";
+import * as requestify from "requestify";
 import { debugBase } from "./debuggers";
 
 let server;
@@ -15,15 +15,16 @@ const sendRequest = ({ url, method, body }): Promise<any> => {
         body: ${reqBody}
       `);
 
-    request({
-      uri: encodeURI(url),
-      method,
-      headers: {
-        "Content-Type": "application/json",
-      },
-      ...body,
-      json: true,
-    })
+    requestify
+      .request({
+        uri: encodeURI(url),
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        ...body,
+        json: true,
+      })
       .then((res) => {
         debugBase(`
         Success from ${url}
