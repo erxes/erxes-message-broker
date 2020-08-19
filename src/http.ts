@@ -4,46 +4,37 @@ import { debugBase } from "./debuggers";
 let server;
 let envs;
 
-const sendRequest = ({ url, method, body }): Promise<any> => {
-  return new Promise((resolve, reject) => {
-    const reqBody = JSON.stringify(body || {});
+const sendRequest = async ({ url, method, body }) => {
+  debugBase(`
+    Sending request to
+    url: ${url}
+    method: ${method}
+    body: ${JSON.stringify(body)}
+  `);
+
+  try {
+    const response = await requestify.request(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body,
+    });
+
+    const responseBody = response.getBody();
 
     debugBase(`
-        Sending request
-        url: ${url}
-        method: ${method}
-        body: ${reqBody}
-      `);
+      Success from : ${url}
+      responseBody: ${JSON.stringify(responseBody)}
+    `);
 
-    requestify
-      .request({
-        uri: encodeURI(url),
-        method,
-        headers: {
-          "Content-Type": "application/json",
-        },
-        ...body,
-        json: true,
-      })
-      .then((res) => {
-        debugBase(`
-        Success from ${url}
-        requestBody: ${reqBody}
-        responseBody: ${JSON.stringify(res)}
-      `);
-
-        return resolve(res);
-      })
-      .catch((e) => {
-        if (e.code === "ECONNREFUSED") {
-          debugBase(`Failed to connect ${url}`);
-          throw new Error(`Failed to connect ${url}`);
-        } else {
-          debugBase(`Error occurred in ${url}: ${e.body}`);
-          reject(e);
-        }
-      });
-  });
+    return responseBody;
+  } catch (e) {
+    if (e.code === "ECONNREFUSED" || e.code === "ENOTFOUND") {
+      throw new Error(e.message);
+    } else {
+      const message = e.body || e.message;
+      throw new Error(message);
+    }
+  }
 };
 
 const getUrl = (queueName) => {
