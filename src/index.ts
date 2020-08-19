@@ -1,9 +1,11 @@
-import * as coteClient from './cote';
-import * as rabbitmqClient from './rabbitmq';
+import * as httpClient from "./http";
+import * as rabbitmqClient from "./rabbitmq";
 
 interface IOptions {
   name: string;
   RABBITMQ_HOST?: string;
+  server?: any;
+  envs?: { [key: string]: string };
 }
 
 const init = async (options: IOptions) => {
@@ -12,9 +14,9 @@ const init = async (options: IOptions) => {
 
     return rabbitmqClient;
   } else {
-    coteClient.init(options);
+    httpClient.init(options);
 
-    return coteClient;
+    return httpClient;
   }
 };
 
