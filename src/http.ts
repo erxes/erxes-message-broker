@@ -87,6 +87,8 @@ const getUrl = (queueName) => {
 
 export const consumeQueue = (queueName, callback) => {
   server.post(`/${queueName}`, async (req, res) => {
+    debugBase(`Adding post for ${queueName}`);
+
     const response = await callback(req.body);
 
     if (!response) {
