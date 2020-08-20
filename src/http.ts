@@ -65,6 +65,11 @@ const getUrl = (queueName) => {
     return `${MAIN_APP_DOMAIN}/integrations`;
   }
 
+  // from engages to erxes-api
+  if (queueName === "engagesNotification") {
+    return envs.MAIN_API_DOMAIN;
+  }
+
   if (queueName === "rpc_queue:integrations_to_api") {
     return envs.MAIN_API_DOMAIN;
   }
