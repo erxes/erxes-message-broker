@@ -10,8 +10,6 @@ interface IOptions {
 
 const init = async (options: IOptions) => {
   if (options.envs.NODE_ENV === "test") {
-    console.log("Using fake ....");
-
     fakeClient.init(options);
 
     return fakeClient;
