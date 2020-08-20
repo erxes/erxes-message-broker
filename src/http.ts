@@ -4,7 +4,7 @@ import { debugBase } from "./debuggers";
 let server;
 let envs;
 
-const sendRequest = async ({ url, method, body }) => {
+const sendRequest = async ({ url, method, body }, throwError = false) => {
   debugBase(`
     Sending request to
     url: ${url}
@@ -28,11 +28,13 @@ const sendRequest = async ({ url, method, body }) => {
 
     return responseBody;
   } catch (e) {
-    if (e.code === "ECONNREFUSED" || e.code === "ENOTFOUND") {
-      throw new Error(e.message);
-    } else {
-      const message = e.body || e.message;
-      throw new Error(message);
+    if (throwError) {
+      if (e.code === "ECONNREFUSED" || e.code === "ENOTFOUND") {
+        throw new Error(e.message);
+      } else {
+        const message = e.body || e.message;
+        throw new Error(message);
+      }
     }
   }
 };
@@ -97,18 +99,24 @@ export const consumeQueue = (queueName, callback) => {
   });
 };
 
-export const sendMessage = async (queueName, data) => {
-  const response = await sendRequest({
-    url: `${getUrl(queueName)}/${queueName}`,
-    method: "POST",
-    body: data,
-  });
+export const sendMessage = async (queueName, data, throwError = false) => {
+  const response = await sendRequest(
+    {
+      url: `${getUrl(queueName)}/${queueName}`,
+      method: "POST",
+      body: data,
+    },
+    throwError
+  );
 
   return response;
 };
 
 export const consumeRPCQueue = consumeQueue;
-export const sendRPCMessage = sendMessage;
+
+export const sendRPCMessage = (queueName, data) => {
+  return sendMessage(queueName, data, true);
+};
 
 export const init = async (options: any) => {
   server = options.server;
