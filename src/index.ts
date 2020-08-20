@@ -1,4 +1,5 @@
 import * as httpClient from "./http";
+import * as fakeClient from "./fake";
 import * as rabbitmqClient from "./rabbitmq";
 
 interface IOptions {
@@ -8,6 +9,11 @@ interface IOptions {
 }
 
 const init = async (options: IOptions) => {
+  if (options.envs.NODE_ENV === "test") {
+    console.log("Using fake ....");
+    return fakeClient.init(options);
+  }
+
   if (options.envs.RABBITMQ_HOST) {
     await rabbitmqClient.init(options.envs.RABBITMQ_HOST);
 
