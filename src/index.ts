@@ -11,7 +11,10 @@ interface IOptions {
 const init = async (options: IOptions) => {
   if (options.envs.NODE_ENV === "test") {
     console.log("Using fake ....");
-    return fakeClient.init(options);
+
+    fakeClient.init(options);
+
+    return fakeClient;
   }
 
   if (options.envs.RABBITMQ_HOST) {
