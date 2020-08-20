@@ -4,7 +4,7 @@ import { debugBase } from "./debuggers";
 let server;
 let envs;
 
-const sendRequest = async ({ url, method, body }, throwError = false) => {
+const sendRequest = async ({ url, method, body }, wait = false) => {
   debugBase(`
     Sending request to
     url: ${url}
@@ -12,23 +12,25 @@ const sendRequest = async ({ url, method, body }, throwError = false) => {
     body: ${JSON.stringify(body)}
   `);
 
-  try {
-    const response = await requestify.request(url, {
-      method,
-      headers: { "Content-Type": "application/json" },
-      body,
-    });
+  const reqParams = {
+    method,
+    headers: { "Content-Type": "application/json" },
+    body,
+  };
 
-    const responseBody = response.getBody();
+  if (wait) {
+    try {
+      const response = await requestify.request(url, reqParams);
 
-    debugBase(`
-      Success from : ${url}
-      responseBody: ${JSON.stringify(responseBody)}
-    `);
+      const responseBody = response.getBody();
 
-    return responseBody;
-  } catch (e) {
-    if (throwError) {
+      debugBase(`
+        Success from : ${url}
+        responseBody: ${JSON.stringify(responseBody)}
+      `);
+
+      return responseBody;
+    } catch (e) {
       if (e.code === "ECONNREFUSED" || e.code === "ENOTFOUND") {
         throw new Error(e.message);
       } else {
@@ -36,6 +38,11 @@ const sendRequest = async ({ url, method, body }, throwError = false) => {
         throw new Error(message);
       }
     }
+  } else {
+    requestify
+      .request(url, reqParams)
+      .then(() => debugBase("success"))
+      .catch((e) => debugBase(e.message));
   }
 };
 
@@ -99,14 +106,14 @@ export const consumeQueue = (queueName, callback) => {
   });
 };
 
-export const sendMessage = async (queueName, data, throwError = false) => {
+export const sendMessage = async (queueName, data, wait = false) => {
   const response = await sendRequest(
     {
       url: `${getUrl(queueName)}/${queueName}`,
       method: "POST",
       body: data,
     },
-    throwError
+    wait
   );
 
   return response;
