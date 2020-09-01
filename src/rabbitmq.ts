@@ -1,13 +1,13 @@
-import * as amqplib from 'amqplib';
-import { v4 as uuid } from 'uuid';
-import { debugBase } from './debuggers';
+import * as amqplib from "amqplib";
+import { v4 as uuid } from "uuid";
+import { debugBase } from "./debuggers";
 
 let channel;
 
 export const consumeQueue = async (queueName, callback) => {
   await channel.assertQueue(queueName);
 
-  channel.consume(queueName, async msg => {
+  channel.consume(queueName, async (msg) => {
     if (msg !== null) {
       callback(JSON.parse(msg.content.toString()), msg);
 
@@ -17,39 +17,50 @@ export const consumeQueue = async (queueName, callback) => {
 };
 
 export const consumeRPCQueue = async (queueName, callback) => {
-  channel.consume(queueName, async msg => {
+  await channel.assertQueue(queueName);
+
+  channel.consume(queueName, async (msg) => {
     if (msg !== null) {
       debugBase(`Received rpc queue message ${msg.content.toString()}`);
 
       const response = await callback(JSON.parse(msg.content.toString()));
 
-      channel.sendToQueue(msg.properties.replyTo, Buffer.from(JSON.stringify(response)), {
-        correlationId: msg.properties.correlationId,
-      });
+      channel.sendToQueue(
+        msg.properties.replyTo,
+        Buffer.from(JSON.stringify(response)),
+        {
+          correlationId: msg.properties.correlationId,
+        }
+      );
 
       channel.ack(msg);
     }
   });
 };
 
-export const sendRPCMessage = async (queueName: string, message: any): Promise<any> => {
-  debugBase(`Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`);
+export const sendRPCMessage = async (
+  queueName: string,
+  message: any
+): Promise<any> => {
+  debugBase(
+    `Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`
+  );
 
   const response = await new Promise((resolve, reject) => {
     const correlationId = uuid();
 
-    return channel.assertQueue('', { exclusive: true }).then(q => {
+    return channel.assertQueue("", { exclusive: true }).then((q) => {
       channel.consume(
         q.queue,
-        msg => {
+        (msg) => {
           if (!msg) {
-            return reject(new Error('consumer cancelled by rabbitmq'));
+            return reject(new Error("consumer cancelled by rabbitmq"));
           }
 
           if (msg.properties.correlationId === correlationId) {
             const res = JSON.parse(msg.content.toString());
 
-            if (res.status === 'success') {
+            if (res.status === "success") {
               resolve(res.data);
             } else {
               reject(new Error(res.errorMessage));
@@ -58,7 +69,7 @@ export const sendRPCMessage = async (queueName: string, message: any): Promise<a
             channel.deleteQueue(q.queue);
           }
         },
-        { noAck: true },
+        { noAck: true }
       );
 
       channel.sendToQueue(queueName, Buffer.from(JSON.stringify(message)), {
@@ -78,7 +89,7 @@ export const sendMessage = async (queueName: string, data?: any) => {
   await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data || {})));
 };
 
-export const init = async RABBITMQ_HOST => {
+export const init = async (RABBITMQ_HOST) => {
   const connection = await amqplib.connect(RABBITMQ_HOST);
 
   channel = await connection.createChannel();
