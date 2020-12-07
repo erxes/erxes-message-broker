@@ -57,7 +57,10 @@ const getUrl = (queueName) => {
     return "http://127.0.0.1:3800";
   }
 
-  if (queueName === "erxes-api:integrations-notification") {
+  if (
+    queueName === "erxes-api:integrations-notification" ||
+    queueName === "rpc_queue:api_to_integrations"
+  ) {
     if (envs.INTEGRATIONS_API_DOMAIN) {
       return envs.INTEGRATIONS_API_DOMAIN;
     }
