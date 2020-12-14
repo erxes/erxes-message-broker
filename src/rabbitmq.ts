@@ -5,37 +5,49 @@ import { debugBase } from "./debuggers";
 let channel;
 
 export const consumeQueue = async (queueName, callback) => {
-  await channel.assertQueue(queueName);
+  try {
+    await channel.assertQueue(queueName);
 
-  channel.consume(queueName, async (msg) => {
-    if (msg !== null) {
-      callback(JSON.parse(msg.content.toString()), msg);
+    channel.consume(queueName, async (msg) => {
+      if (msg !== null) {
+        callback(JSON.parse(msg.content.toString()), msg);
 
-      channel.ack(msg);
-    }
-  });
+        channel.ack(msg);
+      }
+    });
+  } catch (e) {
+    console.log(
+      `Error occurred during consumeq queue ${queueName} ${e.message}`
+    );
+  }
 };
 
 export const consumeRPCQueue = async (queueName, callback) => {
-  await channel.assertQueue(queueName);
+  try {
+    await channel.assertQueue(queueName);
 
-  channel.consume(queueName, async (msg) => {
-    if (msg !== null) {
-      debugBase(`Received rpc queue message ${msg.content.toString()}`);
+    channel.consume(queueName, async (msg) => {
+      if (msg !== null) {
+        debugBase(`Received rpc queue message ${msg.content.toString()}`);
 
-      const response = await callback(JSON.parse(msg.content.toString()));
+        const response = await callback(JSON.parse(msg.content.toString()));
 
-      channel.sendToQueue(
-        msg.properties.replyTo,
-        Buffer.from(JSON.stringify(response)),
-        {
-          correlationId: msg.properties.correlationId,
-        }
-      );
+        channel.sendToQueue(
+          msg.properties.replyTo,
+          Buffer.from(JSON.stringify(response)),
+          {
+            correlationId: msg.properties.correlationId,
+          }
+        );
 
-      channel.ack(msg);
-    }
-  });
+        channel.ack(msg);
+      }
+    });
+  } catch (e) {
+    console.log(
+      `Error occurred during consume rpc queue ${queueName} ${e.message}`
+    );
+  }
 };
 
 export const sendRPCMessage = async (
@@ -83,10 +95,17 @@ export const sendRPCMessage = async (
 };
 
 export const sendMessage = async (queueName: string, data?: any) => {
-  debugBase(`Sending message to ${queueName}`);
+  try {
+    debugBase(`Sending message to ${queueName}`);
 
-  await channel.assertQueue(queueName);
-  await channel.sendToQueue(queueName, Buffer.from(JSON.stringify(data || {})));
+    await channel.assertQueue(queueName);
+    await channel.sendToQueue(
+      queueName,
+      Buffer.from(JSON.stringify(data || {}))
+    );
+  } catch (e) {
+    console.log(`Error occurred during send queue ${queueName} ${e.message}`);
+  }
 };
 
 export const init = async (RABBITMQ_HOST) => {
