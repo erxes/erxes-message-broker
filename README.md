@@ -2,42 +2,38 @@
 
 # if
 
-# erxes-a
+## erxes-a
 
-# envs:
+### envs:
 
-# RABBITMQ_HOST-X
+#### RABBITMQ_HOST-X
 
-#
+## erxes-b
 
-# erxes-b
+### envs:
 
-# envs:
-
-# RABBITMQ_HOST-X
+#### RABBITMQ_HOST-X
 
 # then
 
-# erxes-a
+## erxes-a
 
-# envs:
+### envs:
 
-# RABBITMQ_HOST-X
+#### RABBITMQ_HOST-X
 
-# MESSAGE_BROKER_PREFIX-a
+#### MESSAGE_BROKER_PREFIX-a
 
-#
+## erxes-b
 
-# erxes-b
+### envs:
 
-# envs:
+#### RABBITMQ_HOST-X
 
-# RABBITMQ_HOST-X
-
-# MESSAGE_BROKER_PREFIX-b
+#### MESSAGE_BROKER_PREFIX-b
 
 # else
 
-# MESSAGE_BROKER_PREFIX -- undefined (not must)
+## MESSAGE_BROKER_PREFIX -- undefined (not must)
 
 # endif
