@@ -1,13 +1,15 @@
 # erxes-message-broker
 
-````if
+```
+if (
   erxes-a
     envs:
       RABBITMQ_HOST-X
-
+  and
   erxes-b
     envs:
       RABBITMQ_HOST-X
+)
 then
   erxes-a
     envs:
@@ -20,5 +22,5 @@ then
       MESSAGE_BROKER_PREFIX-b
 else
   MESSAGE_BROKER_PREFIX -- undefined (not must)
-endif```
-````
+endif
+```
