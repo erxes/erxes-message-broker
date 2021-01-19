@@ -16,7 +16,10 @@ const init = async (options: IOptions) => {
   }
 
   if (options.envs.RABBITMQ_HOST) {
-    await rabbitmqClient.init(options.envs.RABBITMQ_HOST);
+    await rabbitmqClient.init(
+      options.envs.RABBITMQ_HOST,
+      options.envs.MESSAGE_BROKER_PREFIX || ""
+    );
 
     return rabbitmqClient;
   } else {

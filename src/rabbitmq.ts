@@ -3,8 +3,11 @@ import { v4 as uuid } from "uuid";
 import { debugBase } from "./debuggers";
 
 let channel;
+let queuePrefix;
 
 export const consumeQueue = async (queueName, callback) => {
+  queueName = queueName.concat(queuePrefix);
+
   try {
     await channel.assertQueue(queueName);
 
@@ -23,6 +26,8 @@ export const consumeQueue = async (queueName, callback) => {
 };
 
 export const consumeRPCQueue = async (queueName, callback) => {
+  queueName = queueName.concat(queuePrefix);
+
   try {
     await channel.assertQueue(queueName);
 
@@ -54,6 +59,8 @@ export const sendRPCMessage = async (
   queueName: string,
   message: any
 ): Promise<any> => {
+  queueName = queueName.concat(queuePrefix);
+
   debugBase(
     `Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`
   );
@@ -95,6 +102,8 @@ export const sendRPCMessage = async (
 };
 
 export const sendMessage = async (queueName: string, data?: any) => {
+  queueName = queueName.concat(queuePrefix);
+
   try {
     debugBase(`Sending message to ${queueName}`);
 
@@ -108,8 +117,9 @@ export const sendMessage = async (queueName: string, data?: any) => {
   }
 };
 
-export const init = async (RABBITMQ_HOST) => {
+export const init = async (RABBITMQ_HOST, prefix) => {
   const connection = await amqplib.connect(RABBITMQ_HOST);
 
   channel = await connection.createChannel();
+  queuePrefix = prefix;
 };
