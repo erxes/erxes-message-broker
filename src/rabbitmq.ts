@@ -5,8 +5,8 @@ import { debugBase } from "./debuggers";
 let channel;
 let queuePrefix;
 
-export const consumeQueue = async (queueName, callback, hasPrefix = true) => {
-  queueName = hasPrefix ? queueName.concat(queuePrefix) : queueName;
+export const consumeQueue = async (queueName, callback) => {
+  queueName = queueName.concat(queuePrefix);
 
   try {
     await channel.assertQueue(queueName);
@@ -25,12 +25,8 @@ export const consumeQueue = async (queueName, callback, hasPrefix = true) => {
   }
 };
 
-export const consumeRPCQueue = async (
-  queueName,
-  callback,
-  hasPrefix = true
-) => {
-  queueName = hasPrefix ? queueName.concat(queuePrefix) : queueName;
+export const consumeRPCQueue = async (queueName, callback) => {
+  queueName = queueName.concat(queuePrefix);
 
   try {
     await channel.assertQueue(queueName);
@@ -61,10 +57,9 @@ export const consumeRPCQueue = async (
 
 export const sendRPCMessage = async (
   queueName: string,
-  message: any,
-  hasPrefix = true
+  message: any
 ): Promise<any> => {
-  queueName = hasPrefix ? queueName.concat(queuePrefix) : queueName;
+  queueName = queueName.concat(queuePrefix);
 
   debugBase(
     `Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`
@@ -106,12 +101,8 @@ export const sendRPCMessage = async (
   return response;
 };
 
-export const sendMessage = async (
-  queueName: string,
-  data?: any,
-  hasPrefix = true
-) => {
-  queueName = hasPrefix ? queueName.concat(queuePrefix) : queueName;
+export const sendMessage = async (queueName: string, data?: any) => {
+  queueName = queueName.concat(queuePrefix);
 
   try {
     debugBase(`Sending message to ${queueName}`);
