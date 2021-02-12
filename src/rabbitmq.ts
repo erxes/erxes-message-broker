@@ -105,13 +105,12 @@ export const sendMessage = async (queueName: string, data?: any) => {
   queueName = queueName.concat(queuePrefix);
 
   try {
-    debugBase(`Sending message to ${queueName}`);
+    const message = JSON.stringify(data || {});
+
+    debugBase(`Sending message ${message} to ${queueName}`);
 
     await channel.assertQueue(queueName);
-    await channel.sendToQueue(
-      queueName,
-      Buffer.from(JSON.stringify(data || {}))
-    );
+    await channel.sendToQueue(queueName, Buffer.from(message));
   } catch (e) {
     console.log(`Error occurred during send queue ${queueName} ${e.message}`);
   }
