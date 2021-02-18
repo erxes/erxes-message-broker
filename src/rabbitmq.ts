@@ -7,21 +7,22 @@ let queuePrefix;
 
 export const consumeQueue = async (queueName, callback) => {
   queueName = queueName.concat(queuePrefix);
+  await channel.assertQueue(queueName);
 
   try {
-    await channel.assertQueue(queueName);
-
     channel.consume(queueName, async (msg) => {
       if (msg !== null) {
-        callback(JSON.parse(msg.content.toString()), msg);
+        try {
+          await callback(JSON.parse(msg.content.toString()), msg);
 
-        channel.ack(msg);
+          channel.ack(msg);
+        } catch (e) {
+          debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+        }
       }
     });
   } catch (e) {
-    console.log(
-      `Error occurred during consumeq queue ${queueName} ${e.message}`
-    );
+    debugBase(`Error occurred during consumeq queue ${queueName} ${e.message}`);
   }
 };
 
@@ -35,17 +36,21 @@ export const consumeRPCQueue = async (queueName, callback) => {
       if (msg !== null) {
         debugBase(`Received rpc queue message ${msg.content.toString()}`);
 
-        const response = await callback(JSON.parse(msg.content.toString()));
+        try {
+          const response = await callback(JSON.parse(msg.content.toString()));
 
-        channel.sendToQueue(
-          msg.properties.replyTo,
-          Buffer.from(JSON.stringify(response)),
-          {
-            correlationId: msg.properties.correlationId,
-          }
-        );
+          channel.sendToQueue(
+            msg.properties.replyTo,
+            Buffer.from(JSON.stringify(response)),
+            {
+              correlationId: msg.properties.correlationId,
+            }
+          );
 
-        channel.ack(msg);
+          channel.ack(msg);
+        } catch (e) {
+          debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+        }
       }
     });
   } catch (e) {
@@ -121,5 +126,6 @@ export const init = async (RABBITMQ_HOST, prefix) => {
   const connection = await amqplib.connect(RABBITMQ_HOST);
 
   channel = await connection.createChannel();
+
   queuePrefix = prefix;
 };

@@ -100,7 +100,17 @@ export const consumeQueue = (queueName, callback) => {
   server.post(`/${queueName}`, async (req, res) => {
     debugBase(`Received data in ${queueName}`);
 
-    const response = await callback(req.body);
+    let response;
+
+    try {
+      response = await callback(req.body);
+    } catch (e) {
+      const errorMessage = `Error occurred during callback ${queueName} ${e.message}`;
+
+      debugBase(errorMessage);
+
+      return res.status(500).send(errorMessage);
+    }
 
     if (!response) {
       return res.send("ok");

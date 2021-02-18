@@ -15,7 +15,11 @@ export const consumeQueue = async (queueName: string, callback: any) => {
   }
 
   subscriber.on(queueName, async (req) => {
-    await callback(JSON.parse(req));
+    try {
+      await callback(JSON.parse(req));
+    } catch (e) {
+      debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+    }
   });
 };
 
@@ -55,9 +59,13 @@ export const consumeRPCQueue = async (queueName: string, callback: any) => {
   }
 
   responders[queueName].on(queueName, async (req: any, cb: any) => {
-    const response = await callback(JSON.parse(req.message));
+    try {
+      const response = await callback(JSON.parse(req.message));
 
-    cb(null, response);
+      cb(null, response);
+    } catch (e) {
+      debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+    }
   });
 };
 
