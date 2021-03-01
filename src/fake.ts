@@ -1,14 +1,14 @@
-import { debugBase } from "./debuggers";
+import { ddInfo } from "./debuggers";
 
 let server;
 let envs;
 
 export const consumeQueue = (queueName) => {
-  debugBase(`Adding post for ${queueName}`);
+  ddInfo(`Adding post for ${queueName}`);
 };
 
 export const sendMessage = async (queueName) => {
-  debugBase(`Sent message to ${queueName}`);
+  ddInfo(`Sent message to ${queueName}`);
 };
 
 export const consumeRPCQueue = consumeQueue;

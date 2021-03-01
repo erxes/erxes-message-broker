@@ -1,6 +1,6 @@
 import * as amqplib from "amqplib";
 import { v4 as uuid } from "uuid";
-import { debugBase } from "./debuggers";
+import { ddInfo, ddError } from "./debuggers";
 
 let channel;
 let queuePrefix;
@@ -17,12 +17,12 @@ export const consumeQueue = async (queueName, callback) => {
 
           channel.ack(msg);
         } catch (e) {
-          debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+          ddError(`Error occurred during callback ${queueName} ${e.message}`);
         }
       }
     });
   } catch (e) {
-    debugBase(`Error occurred during consumeq queue ${queueName} ${e.message}`);
+    ddError(`Error occurred during consumeq queue ${queueName} ${e.message}`);
   }
 };
 
@@ -34,7 +34,7 @@ export const consumeRPCQueue = async (queueName, callback) => {
 
     channel.consume(queueName, async (msg) => {
       if (msg !== null) {
-        debugBase(`Received rpc queue message ${msg.content.toString()}`);
+        ddInfo(`Received rpc queue message ${msg.content.toString()}`);
 
         try {
           const response = await callback(JSON.parse(msg.content.toString()));
@@ -49,12 +49,12 @@ export const consumeRPCQueue = async (queueName, callback) => {
 
           channel.ack(msg);
         } catch (e) {
-          debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+          ddError(`Error occurred during callback ${queueName} ${e.message}`);
         }
       }
     });
   } catch (e) {
-    console.log(
+    ddError(
       `Error occurred during consume rpc queue ${queueName} ${e.message}`
     );
   }
@@ -66,7 +66,7 @@ export const sendRPCMessage = async (
 ): Promise<any> => {
   queueName = queueName.concat(queuePrefix);
 
-  debugBase(
+  ddInfo(
     `Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`
   );
 
@@ -112,12 +112,12 @@ export const sendMessage = async (queueName: string, data?: any) => {
   try {
     const message = JSON.stringify(data || {});
 
-    debugBase(`Sending message ${message} to ${queueName}`);
+    ddInfo(`Sending message ${message} to ${queueName}`);
 
     await channel.assertQueue(queueName);
     await channel.sendToQueue(queueName, Buffer.from(message));
   } catch (e) {
-    console.log(`Error occurred during send queue ${queueName} ${e.message}`);
+    ddError(`Error occurred during send queue ${queueName} ${e.message}`);
   }
 };
 

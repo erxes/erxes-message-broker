@@ -1,5 +1,5 @@
 import * as cote from "cote";
-import { debugBase } from "./debuggers";
+import { ddError, ddInfo } from "./debuggers";
 
 let publisher;
 let subscriber;
@@ -18,7 +18,7 @@ export const consumeQueue = async (queueName: string, callback: any) => {
     try {
       await callback(JSON.parse(req));
     } catch (e) {
-      debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+      ddError(`Error occurred during callback ${queueName} ${e.message}`);
     }
   });
 };
@@ -34,7 +34,7 @@ export const sendRPCMessage = async (
     });
   }
 
-  debugBase(
+  ddInfo(
     `Sending rpc message ${JSON.stringify(message)} to queue ${queueName}`
   );
 
@@ -64,13 +64,13 @@ export const consumeRPCQueue = async (queueName: string, callback: any) => {
 
       cb(null, response);
     } catch (e) {
-      debugBase(`Error occurred during callback ${queueName} ${e.message}`);
+      ddError(`Error occurred during callback ${queueName} ${e.message}`);
     }
   });
 };
 
 export const sendMessage = async (queueName: string, data?: any) => {
-  debugBase(`Sending message to ${queueName}`);
+  ddInfo(`Sending message to ${queueName}`);
 
   if (!publisher) {
     publisher = new cote.Publisher({ name: `${name}Publisher` });

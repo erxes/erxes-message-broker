@@ -1,11 +1,11 @@
 import * as requestify from "requestify";
-import { debugBase } from "./debuggers";
+import { ddError, ddInfo } from "./debuggers";
 
 let server;
 let envs;
 
 const sendRequest = async ({ url, method, body }, wait = false) => {
-  debugBase(`
+  ddInfo(`
     Sending request to
     url: ${url}
     method: ${method}
@@ -24,7 +24,7 @@ const sendRequest = async ({ url, method, body }, wait = false) => {
 
       const responseBody = response.getBody();
 
-      debugBase(`
+      ddInfo(`
         Success from : ${url}
         responseBody: ${JSON.stringify(responseBody)}
       `);
@@ -41,8 +41,8 @@ const sendRequest = async ({ url, method, body }, wait = false) => {
   } else {
     requestify
       .request(url, reqParams)
-      .then(() => debugBase("success"))
-      .catch((e) => debugBase(e.message));
+      .then(() => ddInfo("success"))
+      .catch((e) => ddError(e.message));
   }
 };
 
@@ -95,10 +95,10 @@ const getUrl = (queueName) => {
 };
 
 export const consumeQueue = (queueName, callback) => {
-  debugBase(`Adding post for ${queueName}`);
+  ddInfo(`Adding post for ${queueName}`);
 
   server.post(`/${queueName}`, async (req, res) => {
-    debugBase(`Received data in ${queueName}`);
+    ddInfo(`Received data in ${queueName}`);
 
     let response;
 
@@ -107,7 +107,7 @@ export const consumeQueue = (queueName, callback) => {
     } catch (e) {
       const errorMessage = `Error occurred during callback ${queueName} ${e.message}`;
 
-      debugBase(errorMessage);
+      ddError(errorMessage);
 
       return res.status(500).send(errorMessage);
     }
