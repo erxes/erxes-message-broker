@@ -1,6 +1,6 @@
 {
   "name": "erxes-message-broker",
-  "version": "1.0.24",
+  "version": "1.0.25",
   "description": "Message broker for the Erxes",
   "main": "lib/index.js",
   "scripts": {
