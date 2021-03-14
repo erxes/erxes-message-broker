@@ -14,11 +14,11 @@ export const consumeQueue = async (queueName, callback) => {
       if (msg !== null) {
         try {
           await callback(JSON.parse(msg.content.toString()), msg);
-
-          channel.ack(msg);
         } catch (e) {
           ddError(`Error occurred during callback ${queueName} ${e.message}`);
         }
+
+        channel.ack(msg);
       }
     });
   } catch (e) {
@@ -46,11 +46,11 @@ export const consumeRPCQueue = async (queueName, callback) => {
               correlationId: msg.properties.correlationId,
             }
           );
-
-          channel.ack(msg);
         } catch (e) {
           ddError(`Error occurred during callback ${queueName} ${e.message}`);
         }
+
+        channel.ack(msg);
       }
     });
   } catch (e) {
