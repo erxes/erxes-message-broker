@@ -8,19 +8,24 @@ let queuePrefix;
 export const consumeQueue = async (queueName, callback) => {
   queueName = queueName.concat(queuePrefix);
   await channel.assertQueue(queueName);
+  await channel.prefetch(10);
 
   try {
-    channel.consume(queueName, async (msg) => {
-      if (msg !== null) {
-        try {
-          await callback(JSON.parse(msg.content.toString()), msg);
-        } catch (e) {
-          ddError(`Error occurred during callback ${queueName} ${e.message}`);
-        }
+    channel.consume(
+      queueName,
+      async (msg) => {
+        if (msg !== null) {
+          try {
+            await callback(JSON.parse(msg.content.toString()), msg);
+          } catch (e) {
+            ddError(`Error occurred during callback ${queueName} ${e.message}`);
+          }
 
-        channel.ack(msg);
-      }
-    });
+          channel.ack(msg);
+        }
+      },
+      { noAck: false }
+    );
   } catch (e) {
     ddError(`Error occurred during consumeq queue ${queueName} ${e.message}`);
   }
@@ -31,28 +36,33 @@ export const consumeRPCQueue = async (queueName, callback) => {
 
   try {
     await channel.assertQueue(queueName);
+    await channel.prefetch(10);
 
-    channel.consume(queueName, async (msg) => {
-      if (msg !== null) {
-        ddInfo(`Received rpc queue message ${msg.content.toString()}`);
+    channel.consume(
+      queueName,
+      async (msg) => {
+        if (msg !== null) {
+          ddInfo(`Received rpc queue message ${msg.content.toString()}`);
 
-        try {
-          const response = await callback(JSON.parse(msg.content.toString()));
+          try {
+            const response = await callback(JSON.parse(msg.content.toString()));
 
-          channel.sendToQueue(
-            msg.properties.replyTo,
-            Buffer.from(JSON.stringify(response)),
-            {
-              correlationId: msg.properties.correlationId,
-            }
-          );
-        } catch (e) {
-          ddError(`Error occurred during callback ${queueName} ${e.message}`);
+            channel.sendToQueue(
+              msg.properties.replyTo,
+              Buffer.from(JSON.stringify(response)),
+              {
+                correlationId: msg.properties.correlationId,
+              }
+            );
+          } catch (e) {
+            ddError(`Error occurred during callback ${queueName} ${e.message}`);
+          }
+
+          channel.ack(msg);
         }
-
-        channel.ack(msg);
-      }
-    });
+      },
+      { noAck: false }
+    );
   } catch (e) {
     ddError(
       `Error occurred during consume rpc queue ${queueName} ${e.message}`
